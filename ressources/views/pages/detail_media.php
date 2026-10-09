@@ -14,7 +14,7 @@ $p = app\App::getInstance()->getTable('media')->PlayMedia($_GET['id_media']);
             <div class="col-12">
 
                 <div class="video-player">
-                    <a href="index.php?p=welcome" class="back-btn"><i class="lni lni-chevron-left"></i> RETOUR</a>
+                    <a href="index.php?p=welcome" class="back-btn"><i class="lni lni-chevron-left"></i> <?= t('RETOUR') ?></a>
                     <video src="../admin/endpoint/medias/<?=$v[6] ?>" poster="../admin/endpoint/medias/" controls
                         playsinline></video>
                 </div>
@@ -51,7 +51,7 @@ $p = app\App::getInstance()->getTable('media')->PlayMedia($_GET['id_media']);
                                     <circle class="circle-chart__circle" stroke="#4eb04b" stroke-width="2"
                                         stroke-dasharray="50,100" cx="15" cy="15" r="14"></circle>
                                 </svg>
-                                <b>5.4</b> IMDB SCORE
+                                <b>5.4</b> <?= t('NOTE') ?>
                             </div>
                             <!-- end rate -->
                         </li>
@@ -62,18 +62,18 @@ $p = app\App::getInstance()->getTable('media')->PlayMedia($_GET['id_media']);
                             <div class="hd">1080 <b>HD</b></div>
                         </li>
                         <li>
-                            <div class="tags"><?=$v[8]?></div>
+                            <div class="tags"><?= htmlspecialchars(t((string)$v[8]), ENT_QUOTES, 'UTF-8') ?></div>
                         </li>
                     </ul>
                     <p class="description">
                         <?=$v[3]?>
                     </p>
-                    <a href="#" class="add-btn">+ ADD YOUR LIST</a>
+                    <a href="#" class="add-btn">+ <?= t('ADD YOUR LIST') ?></a>
 
                     <div class="rate-box">
                         <a href="#"><i class="lni lni-thumbs-up"></i></a>
                         <a href="#"><i class="lni lni-thumbs-down"></i></a>
-                        <strong>61% liked this film</strong>
+                        <strong><?= t('61% liked this film') ?></strong>
                     </div>
                 </div>
                 <!-- end movie-info-box -->
@@ -105,8 +105,8 @@ $p = app\App::getInstance()->getTable('media')->PlayMedia($_GET['id_media']);
         <div class="row">
             <div class="col-12">
                 <div class="section-title light">
-                    <h6>FIND ANYWHERE ELSE</h6>
-                    <h2>Related Movies</h2>
+                    <h6><?= t('FIND ANYWHERE ELSE') ?></h6>
+                    <h2><?= t('Related Movies') ?></h2>
                 </div>
                 <!-- end section-title -->
             </div>

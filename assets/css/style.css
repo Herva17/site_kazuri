@@ -3732,3 +3732,53 @@ only screen and (max-device-width: 767px) {
         margin-left: 0;
     }
 }
+
+/* ============================================
+   VARIANTE : SECTION GOMA (fond sombre)
+   ============================================ */
+
+.section-goma {
+    background: #111111;
+}
+
+.section-goma .section-title {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.section-goma .section-title h6 {
+    color: #e50914;
+}
+
+.section-goma .section-title h2 {
+    color: #fff;
+}
+
+/* Badge GOMA (différent de la section 1) */
+.section-goma .media-card-badge {
+    background: #e50914;
+    letter-spacing: 2px;
+    font-size: 0.58rem;
+    padding: 4px 10px;
+}
+
+/* Bouton Netflix */
+.netflix-btn {
+    display: inline-block;
+    background: #e50914;
+    color: #fff !important;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-decoration: none !important;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    padding: 15px 50px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.netflix-btn:hover {
+    background: #f6121d;
+    transform: translateY(-2px);
+}

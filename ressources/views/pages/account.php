@@ -1,57 +1,48 @@
- <section class="content-section" data-background="../assets/images/section-pattern01.png">
+ <section class="content-section account-section" data-background="../assets/images/section-pattern01.png">
      <div class="container">
-         <div class="row align-items-center">
+         <div class="row align-items-center account-layout">
              <div class="col-lg-7">
-                 <div class="membership">
-                     <h6>Start Your Membership</h6>
-                     <p>digiflex per month just $9.99<br>You are able to cancel anytime no fee !!!</p>
-                     <form>
+                 <div class="membership account-form">
+                     <p class="account-eyebrow"><?= t('KAZURI · COMPTE') ?></p>
+                     <h2><?= t('Rejoignez Kazuri') ?></h2>
+                     <p class="account-intro"><?= t('Créez votre compte pour retrouver vos films et séries préférés.') ?></p>
+                     <form class="account-form-fields">
                          <div class="form-group">
-                             <input type="text" placeholder="Full Name">
+                             <label class="sr-only" for="account-name"><?= t('Nom complet') ?></label>
+                             <input id="account-name" type="text" placeholder="<?= t('Nom complet') ?>" autocomplete="name">
                          </div>
-                         <!-- end form-group -->
                          <div class="form-group">
-                             <input type="text" placeholder="Your E-mail">
+                             <label class="sr-only" for="account-email"><?= t('Adresse e-mail') ?></label>
+                             <input id="account-email" type="email" placeholder="<?= t('Adresse e-mail') ?>" autocomplete="email">
                          </div>
-                         <!-- end form-group -->
                          <div class="form-group">
-                             <input type="password" placeholder="Password"><i class="lni lni-eye"></i>
+                             <label class="sr-only" for="account-password"><?= t('Mot de passe') ?></label>
+                             <input id="account-password" type="password" placeholder="<?= t('Mot de passe') ?>" autocomplete="new-password">
                          </div>
-                         <!-- end form-group -->
+                         <div class="form-group account-terms">
+                             <label><input type="checkbox"> <?= t('J’accepte les conditions d’utilisation de Kazuri.') ?></label>
+                         </div>
                          <div class="form-group">
-                             <p><input type="checkbox" checked> I agree to accept registration terms about
-                                 digiflex and start my membership</p>
+                             <input type="submit" value="<?= t('CRÉER MON COMPTE') ?>">
                          </div>
-                         <!-- end form-group -->
-                         <div class="form-group">
-                             <input type="submit" value="START MEMBERSHIP">
-                         </div>
-                         <!-- end form-group -->
 
-                         <div class="or">
-                             <span>or</span>
-                             <p>You can pick one of it to sign-in</p>
+                         <div class="or account-social">
+                             <span><?= t('ou') ?></span>
+                             <p><?= t('Continuer avec') ?></p>
                              <a href="#"><i class="lni lni-facebook-filled"></i>
-                                 <small>with Facebook</small>
+                                 <small>Facebook</small>
                              </a> <a href="#"><i class="lni lni-google"></i>
-                                 <small>with Google+</small>
+                                 <small>Google</small>
                              </a>
                          </div>
-                         <!-- end or -->
                      </form>
                  </div>
-                 <!-- end membership -->
              </div>
-             <!-- end col-7 -->
              <div class="col-lg-5">
-                 <figure class="side-image">
-                     <img src="../assets/ico/Logo2_Black.png" alt="Image">
+                 <figure class="account-brand">
+                     <img src="../assets/ico/Logo1_White.png" alt="">
                  </figure>
-                 <!-- end side-image -->
              </div>
-             <!-- end col-5 -->
          </div>
-         <!-- end row -->
      </div>
-     <!-- end container -->
  </section>

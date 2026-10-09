@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="<?= htmlspecialchars($currentLanguage, ENT_QUOTES, 'UTF-8') ?>">
 
 <head>
     <meta charset="utf-8">
@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#e90101" />
     <title>Kazuri | Streaming</title>
     <meta name="author" content="Themezinho">
-    <meta name="description" content="Kazuri est une plateforme de streaming africain">
+    <meta name="description" content="<?= t('Kazuri est une plateforme de streaming africain') ?>">
     <meta name="keywords"
         content="digiflex, video, movie, show, tv, watch, online, streaming, stream, ads, trailer, imdb, dram, action, hollywood, cinema, rate">
 
@@ -40,29 +40,37 @@
     <link rel="stylesheet" href="../assets/css/swiper.min.css">
     <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/account.css?v=<?= filemtime(ROOT . '/assets/css/account.css') ?>">
+    <link rel="stylesheet" href="../assets/css/mobile-menu.css?v=<?= filemtime(ROOT . '/assets/css/mobile-menu.css') ?>">
 </head>
 
-<body>
-    <nav class="mobile-menu">
+<body class="account-page">
+    <nav class="mobile-menu" aria-label="<?= t('Navigation mobile') ?>">
         <div class="inner">
-            <div class="mobile-search">
-                <h6>Type movie or tv show name to find it</h6>
-                <form>
-                    <input type="search" placeholder="Search here">
-                    <input type="submit" value="FIND">
-                </form>
+            <div class="mobile-menu-header">
+                <a class="mobile-menu-brand" href="index.php?p=welcome" aria-label="Kazuri, accueil">
+                    <span>KAZURI</span>
+                    <small><?= t('CINÉMA AFRICAIN') ?></small>
+                </a>
+                <button class="mobile-menu-close" type="button" aria-label="<?= t('Fermer le menu') ?>">
+                    <i class="lni lni-close" aria-hidden="true"></i>
+                </button>
             </div>
-            <!-- end mobile-search -->
-            <a href="index.php?p=account" class="button-account"><i class="lni lni-user"></i> ACCOUNT </a>
+            <a href="index.php?p=account" class="button-account" aria-current="page"><i class="lni lni-user" aria-hidden="true"></i> <?= t('MON COMPTE') ?></a>
             <!-- end button-account -->
             <div class="site-menu">
+                <p class="mobile-menu-label"><?= t('Explorer le catalogue') ?></p>
                 <ul>
-                    <li><a href="index.php?p=welcome">HOME</a></li>
-                    <li><a href="#">MOVIES</a></li>
-                    <li><a href="#">TV SHOWS</a></li>
-                    <li><a href="#">TIPS</a></li>
+                    <li><a href="index.php?p=welcome#series"><?= t('Séries') ?></a></li>
+                    <li><a href="index.php?p=welcome#films"><?= t('Films') ?></a></li>
+                    <li><a href="index.php?p=welcome#jeunesse"><?= t('Jeunesse') ?></a></li>
+                    <li><a href="index.php?p=welcome#nouveautes"><?= t('Nouveautés') ?></a></li>
+                    <li><a href="index.php?p=welcome#boutiques"><?= t('Boutiques') ?></a></li>
+                    <li><a href="index.php?p=welcome#shorts"><?= t('Shorts') ?></a></li>
+                    <li><a href="index.php?p=welcome#autres"><?= t('Autres') ?></a></li>
                 </ul>
             </div>
+            <?php require ROOT . '/ressources/views/partials/language_switcher.php'; ?>
             <!-- end site-menu -->
         </div>
         <!-- end inner -->
@@ -74,45 +82,37 @@
         <!-- end logo -->
         <div class="site-menu">
             <ul>
-                <li><a href="index.php?p=welcome">HOME</a></li>
-                <li><a href="#">MOVIES</a></li>
-                <li><a href="#">TV SHOWS</a></li>
-                <li><a href="#">TIPS</a></li>
+                <li><a href="index.php?p=welcome#series"><?= t('Séries') ?></a></li>
+                <li><a href="index.php?p=welcome#films"><?= t('Films') ?></a></li>
+                <li><a href="index.php?p=welcome#jeunesse"><?= t('Jeunesse') ?></a></li>
+                <li><a href="index.php?p=welcome#nouveautes"><?= t('Nouveautés') ?></a></li>
+                <li><a href="index.php?p=welcome#boutiques"><?= t('Boutiques') ?></a></li>
+                <li><a href="index.php?p=welcome#shorts"><?= t('Shorts') ?></a></li>
+                <li><a href="index.php?p=welcome#autres"><?= t('Autres') ?></a></li>
             </ul>
         </div>
         <!-- end site-menu -->
         <div class="user-menu">
-
-            <div class="navbar-search"> <i class="lni lni-search-alt"></i> </div>
-            <!-- end navbar-search -->
-            <div class="navbar-notify"> <i class="lni lni-alarm"></i><b>2</b>
+            <div class="navbar-search"><i class="lni lni-search-alt"></i></div>
+            <div class="navbar-notify">
+                <i class="lni lni-alarm"></i><b>2</b>
                 <div class="notify-dropdown">
                     <div class="total-notify">
-                        <h6>Notification</h6>
-                        <span>3</span>
+                        <h6><?= t('Notifications') ?></h6>
+                        <span>2</span>
                     </div>
-                    <!-- end total-notify -->
                     <ul>
-                        <li>
-                            <p><u>Marcus</u> download 2000+ Simple Line Icons and Explore</p>
-                            <span>2 Days</span>
-                        </li>
-                        <li>
-                            <p>Added new movie <u>Afterlife</u> Cheatsheet to Start Using With Your Projects.</p>
-                            <span>3 Days</span>
-                        </li>
+                        <li><p><?= t('Une nouvelle vidéo est disponible sur Kazuri.') ?></p><span><?= t('Il y a 2 jours') ?></span></li>
+                        <li><p><?= t('Découvrez les dernières sorties de films et de séries.') ?></p><span><?= t('Il y a 3 jours') ?></span></li>
                     </ul>
                 </div>
-                <!-- end notify-dropdown -->
             </div>
-
-            <!-- end navbar-notify -->
-            <div class="navbar-account"> <a href="index.php?p=account">ACCOUNT <i class="lni lni-user"></i> </a></div>
-            <!-- end navbar-account -->
+            <div class="navbar-account"><a href="index.php?p=account"><?= t('ACCOUNT') ?> <i class="lni lni-user"></i></a></div>
+            <?php require ROOT . '/ressources/views/partials/language_switcher.php'; ?>
         </div>
         <!-- end user-menu -->
         <div class="hamburger-menu">
-            <button class="hamburger">
+            <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
                 <svg width="45" height="45" viewBox="0 0 100 100">
                     <path class="line line1"
                         d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
@@ -127,22 +127,17 @@
     <!-- end navbar -->
     <section class="search-box">
         <div class="container">
-            <h6>Type movie or tv show name to find it</h6>
+                        <h6><?= t('Type movie or tv show name to find it') ?></h6>
             <form>
-                <input type="search" placeholder="Search here">
-                <input type="submit" value="FIND">
+                <input type="search" placeholder="<?= t('Search here') ?>">
+                <input type="submit" value="<?= t('FIND') ?>">
             </form>
-            <ul>
-                <li><a href="#">Pulp Function</a></li>
-                <li><a href="#">Henry Porter</a></li>
-                <li><a href="#">The Racer</a></li>
-            </ul>
         </div>
         <!-- end container -->
     </section>
     <header class="page-header">
         <div class="container">
-            <h1>Account</h1>
+            <h1><?= t('Account') ?></h1>
         </div>
     </header>
     <!-- end page-header -->
@@ -153,48 +148,39 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-4">
-                        <h5 class="call-us">Questions? <strong>Call +33 753-864-021</strong></h5>
-                        <p> Format for custom post types that are not book
-                            or you can use else if to <u>specify a second</u> post type the
-                            same way as above. </p>
-                        <div class="language"> <i class="lni lni-world"></i>
-
-                            <select>
-                                <option>English</option>
-                                <option>French</option>
-                                <option>Spanish</option>
-                            </select>
-                        </div>
+                        <h5 class="call-us"><?= t('Questions?') ?> <strong><?= t('Appelez-nous') ?> +33 753-864-021</strong></h5>
+                        <p><?= t('Découvrez les films et séries sélectionnés pour vous.') ?></p>
+                        <div class="language"><i class="lni lni-world"></i><?php require ROOT . '/ressources/views/partials/language_switcher.php'; ?></div>
                         <!-- end language -->
                     </div>
                     <!-- end col-4 -->
                     <div class="col-lg-2 offset-lg-1 col-md-4">
                         <h6 class="widget-title">KazuriTv</h6>
                         <ul class="footer-menu">
-                            <li><a href="index.php?p=welcome">Accueil</a></li>
-                            <li><a href="#">A propos de Kazuri</a></li>
+                            <li><a href="index.php?p=welcome"><?= t('Accueil') ?></a></li>
+                            <li><a href="#"><?= t('À propos') ?> Kazuri</a></li>
 
-                            <li><a href="#">Contact</a></li>
+                            <li><a href="#"><?= t('Contact') ?></a></li>
                         </ul>
                     </div>
                     <!-- end col-4 -->
                     <div class="col-lg-2 col-md-4">
-                        <h6 class="widget-title">SUPPORT</h6>
+                        <h6 class="widget-title"><?= t('SUPPORT') ?></h6>
                         <ul class="footer-menu">
-                            <li><a href="#">FAQ</a></li>
-                            <li><a href="#">Help Center</a></li>
-                            <li><a href="#">Account</a></li>
-                            <li><a href="#">Support <i class="lni lni-question-circle"></i></a></li>
-                            <li><a href="#">Media Center</a></li>
+                            <li><a href="#"><?= t('FAQ') ?></a></li>
+                            <li><a href="#"><?= t('Assistance') ?></a></li>
+                            <li><a href="index.php?p=account"><?= t('Compte') ?></a></li>
+                            <li><a href="#"><?= t('SUPPORT') ?> <i class="lni lni-question-circle"></i></a></li>
+                            <li><a href="#"><?= t('Centre média') ?></a></li>
                         </ul>
                     </div>
                     <!-- end col-4 -->
                     <div class="col-lg-2 col-md-4">
-                        <h6 class="widget-title">POLICIES</h6>
+                        <h6 class="widget-title"><?= t('Politiques') ?></h6>
                         <ul class="footer-menu">
-                            <li><a href="#">Privacy Policy</a></li>
-                            <li><a href="#">Terms & Agreement</a></li>
-                            <li><a href="#">Legal Notices</a></li>
+                            <li><a href="#"><?= t('Confidentialité') ?></a></li>
+                            <li><a href="#"><?= t('Conditions d’utilisation') ?></a></li>
+                            <li><a href="#"><?= t('Mentions légales') ?></a></li>
                         </ul>
                     </div>
                     <!-- end col-4 -->
@@ -203,7 +189,7 @@
             </div>
             <!-- end container -->
             <div class="bottom-bar">
-                <div class="container"> <span>© 2025 Kazuri | Streaming</span> <span>Site create by <a
+                <div class="container"> <span>© 2025 Kazuri | Streaming</span> <span><?= t('Site créé par') ?> <a
                             href="#">ZakuriTeam</a></span> </div>
                 <!-- end container -->
             </div>

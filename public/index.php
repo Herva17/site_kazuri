@@ -5,6 +5,29 @@ define('ROOT', dirname(__DIR__));
 require ROOT. "/app/App.php";
  App::load();
 
+$supportedLanguages = ['fr', 'en', 'sw'];
+if (isset($_GET['lang']) && in_array($_GET['lang'], $supportedLanguages, true)) {
+    $_SESSION['kazuri_language'] = $_GET['lang'];
+}
+$currentLanguage = $_SESSION['kazuri_language'] ?? 'fr';
+if (!in_array($currentLanguage, $supportedLanguages, true)) {
+    $currentLanguage = 'fr';
+}
+$_SESSION['kazuri_language'] = $currentLanguage;
+$translations = require ROOT . '/config/translations.php';
+
+function t($text)
+{
+    global $currentLanguage, $translations;
+    return $translations[$currentLanguage][$text] ?? $text;
+}
+
+$languageOptions = [
+    'fr' => 'Français',
+    'en' => 'English',
+    'sw' => 'Kiswahili',
+];
+
 if (isset($_GET['p'])) {
     $page = $_GET['p'];
 } else {
@@ -21,7 +44,7 @@ if (isset($_GET['p'])) {
 
 ob_start();
 
-if ($page === '/') {
+if ($page === '/' || $page === 'welcome') {
 
     require ROOT . '/ressources/views/pages/welcome.php';
    

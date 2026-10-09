@@ -170,6 +170,10 @@
                                 <option>Tv Shows</option>
                                 <option>Tips</option>
                                 <option>Cartoon</option>
+                                <option>Jeunesse</option>
+                                <option>Boutiques</option>
+                                <option>Shorts</option>
+                                <option>Musics</option>
                             </select>
                         </div>
                         <div class="form-group">
