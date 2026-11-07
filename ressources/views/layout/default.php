@@ -120,11 +120,20 @@
         </div>
         <!-- end container -->
     </section>
+    
     <?php if ($page === '/' || $page === 'welcome'): ?>
     <header class="slider catalog-slider" aria-label="<?= t('Affiches du catalogue Kazuri') ?>">
         <div class="main-slider">
             <div class="swiper-wrapper">
-                <?php foreach ($allLocalPhotos as $index => $photo): ?>
+                <!-- ✅ FIX : Ajout de ?? [tableau de secours] pour éviter le crash si $allLocalPhotos est null -->
+                <?php foreach (($allLocalPhotos ?? [
+                    ['file' => '13.png', 'title' => 'Impuissant'],
+                    ['file' => '4.png', 'title' => 'Roho Nguvu'],
+                    ['file' => '3.png', 'title' => 'Majaribu'],
+                    ['file' => '5.png', 'title' => 'Douleur'],
+                    ['file' => '7.png', 'title' => 'Bhurende'],
+                    ['file' => '12.png', 'title' => 'Bhurende']
+                ]) as $index => $photo): ?>
                 <?php $heroImage = htmlspecialchars($photo['file'], ENT_QUOTES, 'UTF-8'); ?>
                 <div class="swiper-slide">
                     <div class="slide-inner catalog-slide-inner" style="background-image: url('../assets/images/<?= $heroImage ?>')">
@@ -338,7 +347,7 @@
             </div>
             <!-- end container -->
             <div class="bottom-bar">
-                <div class="container"> <span>© 2025 Kazuri | Streaming</span> <span><?= t('Site créé par') ?> <a
+                <div class="container"> <span>© 2026 Kazuri | Streaming</span> <span><?= t('Site créé par') ?> <a
                             href="#">AvenyriaTeam</a></span> </div>
                 <!-- end container -->
             </div>

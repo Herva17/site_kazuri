@@ -1,4 +1,5 @@
 <?php
+$currentPage = $_GET['p'] ?? 'studio';
 if (!class_exists('User')) {
     require_once dirname(__DIR__, 3) . '/Classes/UserClass.php';
 }
@@ -210,18 +211,18 @@ $initials = mb_strtoupper(mb_substr($currentUser->firstName(), 0, 1, 'UTF-8') . 
 <body>
 
     <!-- SIDEBAR STUDIO (UNIQUE À CETTE PAGE) -->
-    <aside class="studio-sidebar">
+      <aside class="studio-sidebar">
         <a href="index.php?p=studio" class="studio-brand">
             <i class="ph-fill ph-play-circle"></i> Kazuri <span>Studio</span>
         </a>
         <div class="studio-nav">
-            <a href="index.php?p=studio" class="studio-nav-item active"><i class="ph ph-chart-pie-slice"></i> Tableau de bord</a>
-            <a href="#" class="studio-nav-item"><i class="ph ph-video-camera"></i> Contenus</a>
-            <a href="#" class="studio-nav-item"><i class="ph ph-chart-line-up"></i> Statistiques</a>
-            <a href="#" class="studio-nav-item"><i class="ph ph-chat-circle-text"></i> Commentaires</a>
-            <a href="#" class="studio-nav-item"><i class="ph ph-currency-dollar"></i> Monétisation</a>
+            <a href="index.php?p=studio" class="studio-nav-item <?= $currentPage === 'studio' ? 'active' : '' ?>"><i class="ph ph-chart-pie-slice"></i> Tableau de bord</a>
+            <a href="index.php?p=studio_contents" class="studio-nav-item <?= $currentPage === 'studio_contents' ? 'active' : '' ?>"><i class="ph ph-video-camera"></i> Contenus</a>
+            <a href="index.php?p=studio_stats" class="studio-nav-item <?= $currentPage === 'studio_stats' ? 'active' : '' ?>"><i class="ph ph-chart-line-up"></i> Statistiques</a>
+            <a href="index.php?p=studio_comments" class="studio-nav-item <?= $currentPage === 'studio_comments' ? 'active' : '' ?>"><i class="ph ph-chat-circle-text"></i> Commentaires</a>
+            <a href="index.php?p=studio_monetization" class="studio-nav-item <?= $currentPage === 'studio_monetization' ? 'active' : '' ?>"><i class="ph ph-currency-dollar"></i> Monétisation</a>
             <div class="nav-sep"></div>
-            <a href="#" class="studio-nav-item"><i class="ph ph-gear"></i> Paramètres</a>
+            <a href="index.php?p=studio_settings" class="studio-nav-item <?= $currentPage === 'studio_settings' ? 'active' : '' ?>"><i class="ph ph-gear"></i> Paramètres</a>
             <a href="index.php?p=home" class="studio-nav-item"><i class="ph ph-arrow-square-out"></i> Quitter le Studio</a>
             <a href="index.php?p=logout" class="studio-nav-item" style="color: #ff4b5c;"><i class="ph ph-sign-out"></i> Déconnexion</a>
         </div>

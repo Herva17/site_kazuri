@@ -1,206 +1,77 @@
-<!DOCTYPE html>
-<html lang="<?= htmlspecialchars($currentLanguage, ENT_QUOTES, 'UTF-8') ?>">
-
+<?php
+if (!class_exists('User')) {
+    require_once dirname(__DIR__, 3) . '/Classes/UserClass.php';
+}
+$currentUser = User::current();
+$userName = $currentUser ? htmlspecialchars($currentUser->fullName()) : 'Invité';
+$isAdmin = $currentUser ? $currentUser->isAdmin() : false;
+$canPublish = $currentUser ? $currentUser->canPublish() : false;
+$initials = '';
+if ($currentUser) {
+    $initials = mb_strtoupper(
+        mb_substr($currentUser->firstName(), 0, 1, 'UTF-8') . 
+        mb_substr($currentUser->lastName(), 0, 1, 'UTF-8'), 
+        'UTF-8'
+    );
+}
+?>
+<!doctype html>
+<html lang="fr">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="theme-color" content="#e90101" />
-    <title>Kazuri | Streaming</title>
-    <meta name="author" content="#">
-    <meta name="description" content="<?= t('Kazuri est une plateforme de streaming africain') ?>">
-    <meta name="keywords"
-        content="digiflex, video, movie, show, tv, watch, online, streaming, stream, ads, trailer, imdb, dram, action, hollywood, cinema, rate">
-
-    <!-- SOCIAL MEDIA META -->
-    <meta property="og:description" content="<?= t('Kazuri, plateforme de cinéma africain') ?>">
-    <meta property="og:title" content="Kazuri | Streaming">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="http://www.kazuri.com">
-
-    <!-- TWITTER META -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@kazuri">
-    <meta name="twitter:description" content="<?= t('Kazuri, plateforme de cinéma africain') ?>">
-    <meta name="twitter:image" content="http://www.themezinho.net/digiflex/preview.png">
-    <link href="../assets/ico/Icon2_Black114.png" rel="apple-touch-icon" sizes="144x144">
-    <link href="../assets/ico/Icon2_Black114.png" rel="apple-touch-icon" sizes="114x114">
-    <link href="../assets/ico/Icon2_Black7272.png" rel="apple-touch-icon" sizes="72x72">
-    <link href="../assets/ico/Icon2_Black7272.png" rel="apple-touch-icon">
-    <link href="../assets/ico/favicon32.png" rel="shortcut icon">
-
-    <!-- CSS FILES -->
-    <link rel="stylesheet" href="../assets/css/lineicons.css">
-    <link rel="stylesheet" href="../assets/css/fancybox.min.css">
-    <link rel="stylesheet" href="../assets/css/swiper.min.css">
-    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/mobile-menu.css?v=<?= filemtime(ROOT . '/assets/css/mobile-menu.css') ?>">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Regarder — Kazuri</title>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+    :root {
+        --bg-base: #0f0f0f; --bg-elevated: #272727; --text-main: #f1f1f1; 
+        --text-muted: #aaaaaa; --accent: #ff2d3a; --header-height: 56px;
+    }
+    * { box-sizing: border-box; }
+    body {
+        background-color: var(--bg-base); color: var(--text-main); 
+        font-family: 'Roboto', Arial, sans-serif;
+        margin: 0; padding: 0; min-height: 100vh;
+    }
+    .topbar {
+        height: var(--header-height); display: flex; align-items: center; justify-content: space-between;
+        padding: 0 16px; background: var(--bg-base); border-bottom: 1px solid #222;
+        position: sticky; top: 0; z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; text-decoration: none; color: #fff; }
+    .brand i { color: var(--accent); font-size: 28px; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .btn-back { color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 8px; background: #272727; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-back:hover { background: #3a3a3a; }
+    .user-initials {
+        width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        font-size: 14px; font-weight: 600; text-transform: uppercase;
+    }
+    .container {
+        max-width: 1400px; margin: 0 auto; padding: 24px;
+    }
+</style>
 </head>
-
 <body>
-    <nav class="mobile-menu" aria-label="<?= t('Navigation mobile') ?>">
-        <div class="inner">
-            <div class="mobile-menu-header">
-                <a class="mobile-menu-brand" href="index.php?p=welcome" aria-label="Kazuri, accueil">
-                    <span>KAZURI</span>
-                    <small><?= t('CINÉMA AFRICAIN') ?></small>
+
+    <header class="topbar">
+        <a href="index.php?p=home" class="brand"><i class="ph-fill ph-play-circle"></i> KAZURI</a>
+        <div class="top-actions">
+            <a href="index.php?p=home" class="btn-back"><i class="ph ph-arrow-left"></i> Accueil</a>
+            <?php if ($currentUser): ?>
+                <a href="index.php?p=account" style="text-decoration: none;">
+                    <div class="user-initials" title="<?= $userName ?>"><?= $initials ?></div>
                 </a>
-                <button class="mobile-menu-close" type="button" aria-label="<?= t('Fermer le menu') ?>">
-                    <i class="lni lni-close" aria-hidden="true"></i>
-                </button>
-            </div>
-            <a href="index.php?p=account" class="button-account"><i class="lni lni-user" aria-hidden="true"></i> <?= t('MON COMPTE') ?></a>
-            <div class="site-menu">
-                <p class="mobile-menu-label"><?= t('Explorer le catalogue') ?></p>
-                <ul>
-                    <li><a href="index.php?p=welcome#series"><?= t('Séries') ?></a></li>
-                    <li><a href="index.php?p=welcome#films"><?= t('Films') ?></a></li>
-                    <li><a href="index.php?p=welcome#jeunesse"><?= t('Jeunesse') ?></a></li>
-                    <li><a href="index.php?p=welcome#nouveautes"><?= t('Nouveautés') ?></a></li>
-                    <li><a href="index.php?p=welcome#boutiques"><?= t('Boutiques') ?></a></li>
-                    <li><a href="index.php?p=welcome#shorts"><?= t('Shorts') ?></a></li>
-                    <li><a href="index.php?p=welcome#autres"><?= t('Autres') ?></a></li>
-                </ul>
-            </div>
-            <?php require ROOT . '/ressources/views/partials/language_switcher.php'; ?>
+            <?php else: ?>
+                <a href="index.php?p=account" class="btn-back">Connexion</a>
+            <?php endif; ?>
         </div>
-        <!-- end inner -->
-    </nav>
-    <!-- end mobile-menu -->
-    <nav class="navbar">
-        <div class="logo"><a href="index.php?p=welcome"><img src="../assets/ico/Icon1_White.png" alt="Kazuri"></a></div>
-        <!-- end logo -->
-        <div class="site-menu">
-            <ul>
-            <li><a href="index.php?p=welcome#series"><?= t('Séries') ?></a></li>
-            <li><a href="index.php?p=welcome#films"><?= t('Films') ?></a></li>
-            <li><a href="index.php?p=welcome#jeunesse"><?= t('Jeunesse') ?></a></li>
-            <li><a href="index.php?p=welcome#nouveautes"><?= t('Nouveautés') ?></a></li>
-            <li><a href="index.php?p=welcome#boutiques"><?= t('Boutiques') ?></a></li>
-            <li><a href="index.php?p=welcome#shorts"><?= t('Shorts') ?></a></li>
-            <li><a href="index.php?p=welcome#autres"><?= t('Autres') ?></a></li>
-            </ul>
-        </div>
-        <!-- end site-menu -->
-        <div class="user-menu">
+    </header>
 
-            <div class="navbar-search"> <i class="lni lni-search-alt"></i> </div>
-            <!-- end navbar-search -->
-            <div class="navbar-notify"> <i class="lni lni-alarm"></i><b>2</b>
-                <div class="notify-dropdown">
-                    <div class="total-notify">
-                        <h6><?= t('Notifications') ?></h6>
-                        <span>2</span>
-                    </div>
-                    <!-- end total-notify -->
-                    <ul>
-                        <li>
-                            <p><?= t('Une nouvelle vidéo est disponible sur Kazuri.') ?></p>
-                            <span><?= t('Il y a 2 jours') ?></span>
-                        </li>
-                        <li>
-                            <p><?= t('Découvrez les dernières sorties de films et de séries.') ?></p>
-                            <span><?= t('Il y a 3 jours') ?></span>
-                        </li>
-                    </ul>
-                </div>
-                <!-- end notify-dropdown -->
-            </div>
+    <div class="container">
+        <?= $content ?>
+    </div>
 
-            <!-- end navbar-notify -->
-            <div class="navbar-account"> <a href="index.php?p=account"><?= t('ACCOUNT') ?> <i class="lni lni-user"></i> </a></div>
-            <?php require ROOT . '/ressources/views/partials/language_switcher.php'; ?>
-            <!-- end navbar-account -->
-        </div>
-        <!-- end user-menu -->
-        <div class="hamburger-menu">
-            <button class="hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
-                <svg width="45" height="45" viewBox="0 0 100 100">
-                    <path class="line line1"
-                        d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
-                    <path class="line line2" d="M 20,50 H 80" />
-                    <path class="line line3"
-                        d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
-                </svg>
-            </button>
-        </div>
-        <!-- end hamburger-menu -->
-    </nav>
-    <!-- end navbar -->
-    <section class="search-box">
-        <div class="container">
-            <h6><?= t('Type movie or tv show name to find it') ?></h6>
-            <form>
-                <input type="search" placeholder="<?= t('Search here') ?>">
-                <input type="submit" value="<?= t('FIND') ?>">
-            </form>
-        </div>
-        <!-- end container -->
-    </section>
-    <main>
-        <?=$content?>
-        <!-- end content-section -->
-        <footer class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <h5 class="call-us"><?= t('Questions?') ?> <strong><?= t('Appelez-nous') ?> +33 753-864-021</strong></h5>
-                        <p><?= t('Découvrez les films et séries sélectionnés pour vous.') ?></p>
-                        <div class="language"><i class="lni lni-world"></i><?php require ROOT . '/ressources/views/partials/language_switcher.php'; ?></div>
-                        <!-- end language -->
-                    </div>
-                    <!-- end col-4 -->
-                    <div class="col-lg-2 offset-lg-1 col-md-4">
-                        <h6 class="widget-title">KazuriTv</h6>
-                        <ul class="footer-menu">
-                            <li><a href="index.php?p=welcome"><?= t('Accueil') ?></a></li>
-                            <li><a href="#"><?= t('À propos') ?> Kazuri</a></li>
-
-                            <li><a href="#"><?= t('Contact') ?></a></li>
-                        </ul>
-                    </div>
-                    <!-- end col-4 -->
-                    <div class="col-lg-2 col-md-4">
-                        <h6 class="widget-title"><?= t('SUPPORT') ?></h6>
-                        <ul class="footer-menu">
-                            <li><a href="#"><?= t('FAQ') ?></a></li>
-                            <li><a href="#"><?= t('Assistance') ?></a></li>
-                            <li><a href="index.php?p=account"><?= t('Compte') ?></a></li>
-                            <li><a href="#"><?= t('SUPPORT') ?> <i class="lni lni-question-circle"></i></a></li>
-                            <li><a href="#"><?= t('Centre média') ?></a></li>
-                        </ul>
-                    </div>
-                    <!-- end col-4 -->
-                    <div class="col-lg-2 col-md-4">
-                        <h6 class="widget-title"><?= t('Politiques') ?></h6>
-                        <ul class="footer-menu">
-                            <li><a href="#"><?= t('Confidentialité') ?></a></li>
-                            <li><a href="#"><?= t('Conditions d’utilisation') ?></a></li>
-                            <li><a href="#"><?= t('Mentions légales') ?></a></li>
-                        </ul>
-                    </div>
-                    <!-- end col-4 -->
-                </div>
-                <!-- end row -->
-            </div>
-            <!-- end container -->
-            <div class="bottom-bar">
-                <div class="container"> <span>© 2025 Kazuri | Streaming</span> <span><?= t('Site créé par') ?> <a
-                            href="#">ZakuriTeam</a></span> </div>
-                <!-- end container -->
-            </div>
-            <!-- end bottom-bar -->
-        </footer>
-        <!-- end footer -->
-    </main>
-
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-    </script>
-    <script src="../assets/js/jquery.min.js"></script>
-    <script src="../assets/js/bootstrap.min.js"></script>
-    <script src="../assets/js/swiper.min.js"></script>
-    <script src="../assets/js/fancybox.min.js"></script>
-    <script src="../assets/js/scripts.js"></script>
 </body>
-
 </html>

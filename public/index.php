@@ -38,42 +38,105 @@ if (isset($_GET['p'])) {
     $page = '/';
 }
 
+// ✅ Petite fonction utilitaire : charge une vue si elle existe, sinon affiche une page "En construction"
+function loadView($page) {
+    $path = ROOT . '/ressources/views/pages/' . $page . '.php';
+    if (file_exists($path)) {
+        require $path;
+    } else {
+        echo '<div style="text-align: center; padding: 80px 20px; color: #aaa;">';
+        echo '<i class="ph ph-construction" style="font-size: 64px; color: #444; display: block; margin-bottom: 16px;"></i>';
+        echo '<h2 style="color: #fff; margin: 0 0 12px;">Page en construction</h2>';
+        echo '<p style="margin: 0 0 20px;">La page <strong>« ' . htmlspecialchars($page) . ' »</strong> sera bientôt disponible.</p>';
+        echo '<a href="index.php?p=home" style="display: inline-block; background: var(--accent); color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Retour à l\'accueil</a>';
+        echo '</div>';
+    }
+}
+
 ob_start();
 
+// ============================================================
 // --- CHARGEMENT DES VUES (CONTENU) ---
+// ============================================================
 if ($page === '/' || $page === 'welcome') {
-    require ROOT . '/ressources/views/pages/welcome.php';
+    loadView('welcome');
 } elseif ($page === 'logout') {
     session_destroy();
     header('Location: index.php?p=account');
     exit;
 } elseif ($page === 'account') {
-    require ROOT . '/ressources/views/pages/account.php';
+    loadView('account');
 } elseif ($page === 'detail') {
-    require ROOT . '/ressources/views/pages/detail_media.php';
+    loadView('detail_media');
 } elseif ($page === 'home') { 
-    require ROOT . '/ressources/views/pages/home.php';
-} elseif ($page === 'subscription') {
-    require ROOT . '/ressources/views/pages/subscription.php';
-} elseif ($page === 'studio') {
-    require ROOT . '/ressources/views/pages/studio.php';
-} else {
-    require ROOT . '/ressources/views/pages/404.php';
+    loadView('home');
+} 
+// ✅ PAGES PUBLIQUES (Films, Séries, Musique, Reels, Bibliothèque, Likes)
+elseif (in_array($page, ['films', 'series', 'musique', 'reels', 'library', 'likes'])) {
+    loadView($page);
+} 
+// ✅ ROUTES ABONNEMENT & CHECKOUT
+elseif ($page === 'subscription') {
+    loadView('subscription');
+} elseif ($page === 'pricing') {
+    loadView('pricing');
+} elseif ($page === 'checkout') {
+    loadView('checkout');
+} 
+// ✅ ROUTES STUDIO (Tableau de bord + sous-pages)
+elseif (in_array($page, [
+    'studio', 'studio_contents', 'studio_stats', 'studio_comments', 
+    'studio_monetization', 'studio_settings', 'studio_upload'
+])) {
+    loadView($page);
+} 
+// ✅ ROUTES ADMIN
+elseif (in_array($page, ['admin', 'admin_users', 'admin_videos'])) {
+    loadView($page);
+} 
+// ✅ PAGE 404
+else {
+    loadView('404');
 }
 
 $content = ob_get_clean();
 
+// ============================================================
 // --- CHARGEMENT DES LAYOUTS (GABARITS) ---
+// ============================================================
 if ($page === 'account') {
-    require ROOT . '/ressources/views/layout/default_account.php';
+    $layoutPath = ROOT . '/ressources/views/layout/default_account.php';
 } elseif ($page === 'detail') {
-    require ROOT . '/ressources/views/layout/default_detailMedia.php';
-} elseif ($page === 'home') {
-    require ROOT . '/ressources/views/layout/default_home.php';
-} elseif ($page === 'subscription') {
-    require ROOT . '/ressources/views/layout/default_dashboard.php';  // ✅ Changé ici
-} elseif ($page === 'studio') {
-    require ROOT . '/ressources/views/layout/default_dashboard.php';
+    $layoutPath = ROOT . '/ressources/views/layout/default_detailMedia.php';
+} 
+// ✅ VITRINE (Page d'accueil non connecté) -> Layout Classique
+elseif (in_array($page, ['/', 'welcome'])) {
+    $layoutPath = ROOT . '/ressources/views/layout/default.php';
+} 
+// ✅ DASHBOARD + PAGES PUBLIQUES (Connecté) -> Layout YouTube
+elseif (in_array($page, ['home', 'films', 'series', 'musique', 'reels', 'library', 'likes'])) {
+    $layoutPath = ROOT . '/ressources/views/layout/default_home.php';
+} 
+// ✅ LAYOUT STUDIO
+elseif (in_array($page, [
+    'subscription', 'pricing', 'checkout', 
+    'studio', 'studio_contents', 'studio_stats', 'studio_comments', 
+    'studio_monetization', 'studio_settings', 'studio_upload'
+])) {
+    $layoutPath = ROOT . '/ressources/views/layout/default_dashboard.php';
+} 
+// ✅ LAYOUT ADMIN
+elseif (in_array($page, ['admin', 'admin_users', 'admin_videos'])) {
+    $layoutPath = ROOT . '/ressources/views/layout/default_admin.php';
+} 
+// LAYOUT PAR DÉFAUT
+else {
+    $layoutPath = ROOT . '/ressources/views/layout/default.php';
+}
+
+// ✅ Vérification finale : si le layout existe, on le charge
+if (file_exists($layoutPath)) {
+    require $layoutPath;
 } else {
-    require ROOT . '/ressources/views/layout/default.php';
+    echo "Erreur : Layout introuvable (" . htmlspecialchars($layoutPath) . ")";
 }

@@ -229,6 +229,17 @@ if (!function_exists('t')) {
     background: rgba(255,255,255,0.08);
     border-color: #666;
   }
+
+  /* --- SELECT PAYS avec drapeaux --- */
+  #country {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  }
 </style>
 </head>
 <body>
@@ -303,8 +314,63 @@ if (!function_exists('t')) {
               </div>
               <div class="form-group">
                 <label class="sr-only" for="country"><?= t('Pays') ?></label>
-                <input id="country" name="country" type="text"
-                       placeholder="<?= t('Pays (RDC, France…)') ?>" autocomplete="country-name">
+                <select id="country" name="country" autocomplete="country">
+                  <option value=""><?= t('Sélectionnez votre pays') ?></option>
+                  <option value="Afrique du Sud">🇿🇦 Afrique du Sud</option>
+                  <option value="Algérie">🇩🇿 Algérie</option>
+                  <option value="Angola">🇦🇴 Angola</option>
+                  <option value="Bénin">🇧🇯 Bénin</option>
+                  <option value="Botswana">🇧🇼 Botswana</option>
+                  <option value="Burkina Faso">🇧🇫 Burkina Faso</option>
+                  <option value="Burundi">🇧🇮 Burundi</option>
+                  <option value="Cameroun">🇨🇲 Cameroun</option>
+                  <option value="Cap-Vert">🇨🇻 Cap-Vert</option>
+                  <option value="Comores">🇰🇲 Comores</option>
+                  <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+                  <option value="Djibouti">🇩🇯 Djibouti</option>
+                  <option value="Égypte">🇪🇬 Égypte</option>
+                  <option value="Érythrée">🇪🇷 Érythrée</option>
+                  <option value="Eswatini">🇸🇿 Eswatini</option>
+                  <option value="Éthiopie">🇪🇹 Éthiopie</option>
+                  <option value="Gabon">🇬🇦 Gabon</option>
+                  <option value="Gambie">🇬🇲 Gambie</option>
+                  <option value="Ghana">🇬🇭 Ghana</option>
+                  <option value="Guinée">🇬🇳 Guinée</option>
+                  <option value="Guinée équatoriale">🇬🇶 Guinée équatoriale</option>
+                  <option value="Guinée-Bissau">🇬🇼 Guinée-Bissau</option>
+                  <option value="Kenya">🇰🇪 Kenya</option>
+                  <option value="Lesotho">🇱🇸 Lesotho</option>
+                  <option value="Liberia">🇱🇷 Liberia</option>
+                  <option value="Libye">🇱🇾 Libye</option>
+                  <option value="Madagascar">🇲🇬 Madagascar</option>
+                  <option value="Malawi">🇲🇼 Malawi</option>
+                  <option value="Mali">🇲🇱 Mali</option>
+                  <option value="Maroc">🇲🇦 Maroc</option>
+                  <option value="Maurice">🇲🇺 Maurice</option>
+                  <option value="Mauritanie">🇲🇷 Mauritanie</option>
+                  <option value="Mozambique">🇲🇿 Mozambique</option>
+                  <option value="Namibie">🇳🇦 Namibie</option>
+                  <option value="Niger">🇳🇪 Niger</option>
+                  <option value="Nigeria">🇳🇬 Nigeria</option>
+                  <option value="Ouganda">🇺🇬 Ouganda</option>
+                  <option value="République Centrafricaine">🇨🇫 République Centrafricaine</option>
+                  <option value="République du Congo">🇨🇬 République du Congo</option>
+                  <option value="République Démocratique du Congo">🇨🇩 République Démocratique du Congo</option>
+                  <option value="Rwanda">🇷🇼 Rwanda</option>
+                  <option value="Sao Tomé-et-Principe">🇸🇹 Sao Tomé-et-Principe</option>
+                  <option value="Sénégal">🇸🇳 Sénégal</option>
+                  <option value="Seychelles">🇸🇨 Seychelles</option>
+                  <option value="Sierra Leone">🇸🇱 Sierra Leone</option>
+                  <option value="Somalie">🇸🇴 Somalie</option>
+                  <option value="Soudan">🇸🇩 Soudan</option>
+                  <option value="Soudan du Sud">🇸🇸 Soudan du Sud</option>
+                  <option value="Tanzanie">🇹🇿 Tanzanie</option>
+                  <option value="Tchad">🇹🇩 Tchad</option>
+                  <option value="Togo">🇹🇬 Togo</option>
+                  <option value="Tunisie">🇹🇳 Tunisie</option>
+                  <option value="Zambie">🇿🇲 Zambie</option>
+                  <option value="Zimbabwe">🇿🇼 Zimbabwe</option>
+                </select>
               </div>
             </div>
 

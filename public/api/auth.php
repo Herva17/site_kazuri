@@ -30,22 +30,18 @@ try {
         $firstName = trim($_POST['first_name'] ?? '');
         $lastName  = trim($_POST['last_name'] ?? '');
         
-        // ✅ SÉCURITÉ : On accepte seulement 'user' ou 'contributor'
         $requestedRole = $_POST['role'] ?? 'user';
         $allowedRoles = ['user', 'contributor']; 
         $role = in_array($requestedRole, $allowedRoles, true) ? $requestedRole : 'user';
         
         $user = User::register($email, $password, $firstName, $lastName, null, $role);
-        
-        // ✅ On connecte l'utilisateur IMMÉDIATEMENT
         $user->login();
 
-        // ✅ REDIRECTION INTELLIGENTE
         $redirectUrl = 'index.php?p=home'; 
         if ($user->isAdmin()) {
             $redirectUrl = 'index.php?p=admin';
         } elseif ($user->hasRole('contributor')) {
-            $redirectUrl = 'index.php?p=subscription'; // ✅ CORRIGÉ ICI
+            $redirectUrl = 'index.php?p=subscription'; 
         }
 
         echo json_encode([
@@ -76,7 +72,6 @@ try {
         if ($user->isAdmin()) {
             $redirectUrl = 'index.php?p=admin';
         } elseif ($user->hasRole('contributor')) {
-            // On l'envoie d'abord vers l'abonnement
             $redirectUrl = 'index.php?p=subscription'; 
         }
 

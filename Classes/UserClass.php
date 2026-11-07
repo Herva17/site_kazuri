@@ -1,9 +1,12 @@
 <?php
 declare(strict_types=1);
 
+// On s'assure que Conn est chargée avant la classe User
+require_once __DIR__ . '/Conn.php';
+
 /**
  * Classe User — gère users, roles et user_roles.
- * Connexion PDO directe intégrée pour éviter les conflits avec MysqlDatabase.php
+ * ⚠️ Ne gère plus la connexion : elle est déléguée à Conn.
  */
 final class User
 {
@@ -36,29 +39,6 @@ final class User
     }
 
     // =====================================================================
-    // CONNEXION BASE DE DONNÉES (Directe)
-    // =====================================================================
-    private static function getPdo(): PDO
-    {
-        static $pdo = null;
-        if ($pdo === null) {
-            // ⚠️ VÉRIFIEZ CES PARAMÈTRES CI-DESSOUS
-            $host = 'localhost';
-            $dbname = 'kazur2501119'; 
-            $user = 'root';
-            $pass = '';         // <-- Vide par défaut sur XAMPP
-
-            $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
-            $pdo = new PDO($dsn, $user, $pass, [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-            ]);
-        }
-        return $pdo;
-    }
-
-    // =====================================================================
     // AUTHENTIFICATION
     // =====================================================================
 
@@ -82,7 +62,7 @@ final class User
             throw new InvalidArgumentException("Prénom requis.");
         }
 
-        $pdo = self::getPdo();
+        $pdo = Conn::getInstance()->getPdo();
         $pdo->beginTransaction();
 
         try {
@@ -121,7 +101,7 @@ final class User
 
     public static function attempt(string $email, string $password): ?self
     {
-        $st = self::getPdo()->prepare(
+        $st = Conn::getInstance()->getPdo()->prepare(
             "SELECT * FROM users WHERE email = ? AND is_active = 1 LIMIT 1"
         );
         $st->execute([strtolower(trim($email))]);
@@ -150,7 +130,7 @@ final class User
             return self::$current = null;
         }
 
-        $st = self::getPdo()->prepare(
+        $st = Conn::getInstance()->getPdo()->prepare(
             "SELECT * FROM users WHERE id = ? AND is_active = 1 LIMIT 1"
         );
         $st->execute([(int)$_SESSION['user_id']]);
@@ -206,7 +186,7 @@ final class User
 
     private function loadRoles(): void
     {
-        $st = self::getPdo()->prepare(
+        $st = Conn::getInstance()->getPdo()->prepare(
             "SELECT r.name
              FROM roles r
              JOIN user_roles ur ON ur.role_id = r.id
@@ -235,13 +215,13 @@ final class User
 
     public function assignRole(string $role): void
     {
-        self::attachRole($this->id, $role, self::getPdo());
+        self::attachRole($this->id, $role, Conn::getInstance()->getPdo());
         $this->loadRoles();
     }
 
     public function removeRole(string $role): void
     {
-        $st = self::getPdo()->prepare(
+        $st = Conn::getInstance()->getPdo()->prepare(
             "DELETE ur FROM user_roles ur
              JOIN roles r ON r.id = ur.role_id
              WHERE ur.user_id = ? AND r.name = ?"
@@ -265,7 +245,53 @@ final class User
     }
 
     // =====================================================================
-    // GETTERS
+    // GESTION DES UTILISATEURS (POUR L'ADMINISTRATION)
+    // =====================================================================
+
+    /**
+     * Récupère tous les utilisateurs avec leurs rôles.
+     */
+    public static function getAllUsers(): array
+    {
+        $pdo = Conn::getInstance()->getPdo();
+        $sql = "SELECT u.id, u.first_name, u.last_name, u.email, u.is_active, u.created_at, 
+                       GROUP_CONCAT(r.name) as roles
+                FROM users u
+                LEFT JOIN user_roles ur ON u.id = ur.user_id
+                LEFT JOIN roles r ON ur.role_id = r.id
+                GROUP BY u.id
+                ORDER BY u.created_at DESC";
+        return $pdo->query($sql)->fetchAll();
+    }
+
+    /**
+     * Supprime un utilisateur par son ID.
+     */
+    public static function deleteUser(int $userId): bool
+    {
+        $pdo = Conn::getInstance()->getPdo();
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        return $stmt->execute([$userId]);
+    }
+
+    /**
+     * Modifie le rôle d'un utilisateur.
+     */
+    public static function updateUserRole(int $userId, string $newRole): bool
+    {
+        $pdo = Conn::getInstance()->getPdo();
+        
+        // 1. On supprime les anciens rôles de gestion pour cet utilisateur
+        $stmt = $pdo->prepare("DELETE ur FROM user_roles ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = ? AND r.name IN ('admin', 'superadmin', 'contributor', 'user')");
+        $stmt->execute([$userId]);
+        
+        // 2. On ajoute le nouveau rôle
+        self::attachRole($userId, $newRole, $pdo);
+        return true;
+    }
+
+    // =====================================================================
+    // GETTERS (inchangés)
     // =====================================================================
 
     public function id(): int             { return $this->id; }
@@ -287,16 +313,16 @@ final class User
     public function toArray(): array
     {
         return [
-            'id'       => $this->id,
-            'name'     => $this->fullName(),
-            'email'    => $this->email,
-            'handle'   => $this->handle(),
-            'avatar'   => $this->avatarUrl(),
-            'role'     => $this->primaryRole(),
-            'roles'    => $this->roles,
-            'joined'   => substr($this->createdAt, 0, 10),
-            'isAdmin'  => $this->isAdmin(),
-            'isSuper'  => $this->isSuperAdmin(),
+            'id'         => $this->id,
+            'name'       => $this->fullName(),
+            'email'      => $this->email,
+            'handle'     => $this->handle(),
+            'avatar'     => $this->avatarUrl(),
+            'role'       => $this->primaryRole(),
+            'roles'      => $this->roles,
+            'joined'     => substr($this->createdAt, 0, 10),
+            'isAdmin'    => $this->isAdmin(),
+            'isSuper'    => $this->isSuperAdmin(),
             'canPublish' => $this->canPublish(),
         ];
     }

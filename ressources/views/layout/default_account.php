@@ -189,8 +189,8 @@
             </div>
             <!-- end container -->
             <div class="bottom-bar">
-                <div class="container"> <span>© 2025 Kazuri | Streaming</span> <span><?= t('Site créé par') ?> <a
-                            href="#">ZakuriTeam</a></span> </div>
+                <div class="container"> <span>© 2026 Kazuri | Streaming</span> <span><?= t('Site créé par') ?> <a
+                            href="#">AvenyriaTeam</a></span> </div> 
                 <!-- end container -->
             </div>
             <!-- end bottom-bar -->
