@@ -1,213 +1,235 @@
 <?php
-declare(strict_types=1);
-require_once dirname(__DIR__, 3) . '/Classes/UserClass.php';
-
-// Utilisateur courant
-$current = User::current();
-
-if (!function_exists('t')) {
-    function t(string $s): string { return $s; }
+if (!class_exists('User')) {
+    require_once dirname(__DIR__, 3) . '/Classes/UserClass.php';
 }
 
-/* =====================================================================
-   DONNÉES RÉELLES — KPI + Graphique
-   ===================================================================== */
+$currentUser = User::current();
+if (!$currentUser) {
+    header('Location: index.php?p=account');
+    exit;
+}
 
-// --- ID utilisateur (robuste : objet User OU tableau OU session) ---
+/* --- ID utilisateur --- */
 $userId = 0;
-if (is_object($current)) {
-    if (method_exists($current, 'getId'))  $userId = (int)$current->getId();
-    elseif (isset($current->id))           $userId = (int)$current->id;
-} elseif (is_array($current)) {
-    $userId = (int)($current['id'] ?? 0);
+if (is_object($currentUser)) {
+    if (method_exists($currentUser, 'getId')) $userId = (int)$currentUser->getId();
+    elseif (isset($currentUser->id))          $userId = (int)$currentUser->id;
+} elseif (is_array($currentUser)) {
+    $userId = (int)($currentUser['id'] ?? 0);
 }
 if ($userId === 0) $userId = (int)($_SESSION['user_id'] ?? 0);
 
-// --- Période analysée (28 jours + 28 jours précédents) ---
-$days        = 28;
-$now         = new DateTimeImmutable('now');
-$periodStart = $now->modify("-{$days} days")->format('Y-m-d H:i:s');
-$prevStart   = $now->modify('-' . ($days * 2) . ' days')->format('Y-m-d H:i:s');
+/* --- Périodes --- */
+$now             = new DateTimeImmutable('now');
+$periodStart     = $now->modify('-28 days')->format('Y-m-d H:i:s');
+$prevPeriodStart = $now->modify('-56 days')->format('Y-m-d H:i:s');
 
-// --- Valeurs par défaut ---
-$kpiViews = ['cur' => 0,  'prev' => 0];
-$kpiHours = ['cur' => 0.0, 'prev' => 0.0];
-$kpiSubs  = ['cur' => 0,  'prev' => 0];
+/* --- Valeurs par défaut --- */
+$totalViews      = 0;
+$watchHours      = 0.0;
+$subsCur         = 0;
+$subsPrev        = 0;
+$likesCur        = 0;
+$likesPrev       = 0;
 
-// --- Requêtes SQL ---
 if (isset($pdo) && $userId > 0) {
     try {
-        // Vues — 28 derniers jours
+        /* 1) Vues totales depuis videos.views */
         $st = $pdo->prepare("
-            SELECT COUNT(*) FROM video_views vv
-            JOIN videos v ON v.id = vv.video_id
-            WHERE v.user_id = ? AND vv.created_at >= ?
+            SELECT COALESCE(SUM(views), 0)
+            FROM videos
+            WHERE user_id = ? AND status = 'published'
         ");
-        $st->execute([$userId, $periodStart]);
-        $kpiViews['cur'] = (int)$st->fetchColumn();
+        $st->execute([$userId]);
+        $totalViews = (int)$st->fetchColumn();
 
-        // Vues — 28 jours précédents
+        /* 2) Temps de visionnage estimé (vues × durée) */
         $st = $pdo->prepare("
-            SELECT COUNT(*) FROM video_views vv
-            JOIN videos v ON v.id = vv.video_id
-            WHERE v.user_id = ? AND vv.created_at >= ? AND vv.created_at < ?
+            SELECT COALESCE(SUM(views * COALESCE(duration_seconds, 0)), 0)
+            FROM videos
+            WHERE user_id = ? AND status = 'published'
         ");
-        $st->execute([$userId, $prevStart, $periodStart]);
-        $kpiViews['prev'] = (int)$st->fetchColumn();
+        $st->execute([$userId]);
+        $watchHours = round((float)$st->fetchColumn() / 3600);
 
-        // Temps de visionnage (secondes → heures)
-        $st = $pdo->prepare("
-            SELECT COALESCE(SUM(vv.watch_seconds),0) FROM video_views vv
-            JOIN videos v ON v.id = vv.video_id
-            WHERE v.user_id = ? AND vv.created_at >= ?
-        ");
-        $st->execute([$userId, $periodStart]);
-        $kpiHours['cur'] = (float)$st->fetchColumn() / 3600;
-
-        $st = $pdo->prepare("
-            SELECT COALESCE(SUM(vv.watch_seconds),0) FROM video_views vv
-            JOIN videos v ON v.id = vv.video_id
-            WHERE v.user_id = ? AND vv.created_at >= ? AND vv.created_at < ?
-        ");
-        $st->execute([$userId, $prevStart, $periodStart]);
-        $kpiHours['prev'] = (float)$st->fetchColumn() / 3600;
-
-        // Abonnés gagnés
+        /* 3) Abonnés (28 derniers jours) */
         $st = $pdo->prepare("
             SELECT COUNT(*) FROM subscriptions
             WHERE channel_id = ? AND created_at >= ?
         ");
         $st->execute([$userId, $periodStart]);
-        $kpiSubs['cur'] = (int)$st->fetchColumn();
+        $subsCur = (int)$st->fetchColumn();
 
         $st = $pdo->prepare("
             SELECT COUNT(*) FROM subscriptions
             WHERE channel_id = ? AND created_at >= ? AND created_at < ?
         ");
-        $st->execute([$userId, $prevStart, $periodStart]);
-        $kpiSubs['prev'] = (int)$st->fetchColumn();
+        $st->execute([$userId, $prevPeriodStart, $periodStart]);
+        $subsPrev = (int)$st->fetchColumn();
+
+        /* 4) Likes (28 derniers jours) */
+        $st = $pdo->prepare("
+            SELECT COUNT(*) FROM video_likes vl
+            JOIN videos v ON v.id = vl.video_id
+            WHERE v.user_id = ? AND vl.created_at >= ?
+        ");
+        $st->execute([$userId, $periodStart]);
+        $likesCur = (int)$st->fetchColumn();
+
+        $st = $pdo->prepare("
+            SELECT COUNT(*) FROM video_likes vl
+            JOIN videos v ON v.id = vl.video_id
+            WHERE v.user_id = ? AND vl.created_at >= ? AND vl.created_at < ?
+        ");
+        $st->execute([$userId, $prevPeriodStart, $periodStart]);
+        $likesPrev = (int)$st->fetchColumn();
+
     } catch (Throwable $e) {
         error_log('[studio_stats] ' . $e->getMessage());
     }
 }
 
-// --- Helpers d'affichage ---
+/* --- Formatage --- */
 if (!function_exists('kpi_fmt')) {
-    function kpi_fmt(float|int $n): string {
-        return number_format($n, 0, ',', ' ');
-    }
+    function kpi_fmt(float|int $n): string { return number_format($n, 0, ',', ' '); }
 }
 if (!function_exists('kpi_delta')) {
     function kpi_delta(float $cur, float $prev): array {
         if ($prev <= 0 && $cur <= 0) return ['up' => true, 'html' => '—'];
         $pct = $prev > 0 ? (($cur - $prev) / $prev) * 100 : 100.0;
         $up  = $pct >= 0;
-        return [
-            'up'   => $up,
-            'html' => ($up ? '▲ +' : '▼ ') . number_format(abs($pct), 0, ',', ' ') . '%',
-        ];
+        return ['up' => $up, 'html' => ($up ? '▲ +' : '▼ ') . number_format(abs($pct), 0, ',', ' ') . '%'];
     }
 }
 
-$viewsDelta = kpi_delta($kpiViews['cur'], $kpiViews['prev']);
-$hoursDelta = kpi_delta($kpiHours['cur'], $kpiHours['prev']);
-$subsDelta  = kpi_delta($kpiSubs['cur'],  $kpiSubs['prev']);
+$subsDelta  = kpi_delta($subsCur,  $subsPrev);
+$likesDelta = kpi_delta($likesCur, $likesPrev);
 
-// --- Graphique : vues par mois sur 12 mois glissants ---
-$monthlyViews = [];
+/* --- Graphique : abonnés + likes gagnés par mois (12 mois) --- */
+$chartSubs  = [];
+$chartLikes = [];
+$monthLabels = [];
 for ($i = 11; $i >= 0; $i--) {
     $d = $now->modify("first day of -{$i} month");
-    $monthlyViews[$d->format('Y-m')] = 0;
+    $key = $d->format('Y-m');
+    $chartSubs[$key]  = 0;
+    $chartLikes[$key] = 0;
+    $monthLabels[$key] = $d->format('m/Y');
 }
+
 if (isset($pdo) && $userId > 0) {
     try {
+        /* Abonnés par mois */
         $st = $pdo->prepare("
-            SELECT DATE_FORMAT(vv.created_at, '%Y-%m') AS ym, COUNT(*) AS c
-            FROM video_views vv
-            JOIN videos v ON v.id = vv.video_id
-            WHERE v.user_id = ?
-              AND vv.created_at >= DATE_FORMAT(NOW() - INTERVAL 11 MONTH, '%Y-%m-01')
+            SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym, COUNT(*) AS c
+            FROM subscriptions
+            WHERE channel_id = ? AND created_at >= DATE_FORMAT(NOW() - INTERVAL 11 MONTH, '%Y-%m-01')
             GROUP BY ym
         ");
         $st->execute([$userId]);
         foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
-            if (isset($monthlyViews[$r['ym']])) {
-                $monthlyViews[$r['ym']] = (int)$r['c'];
-            }
+            if (isset($chartSubs[$r['ym']])) $chartSubs[$r['ym']] = (int)$r['c'];
+        }
+
+        /* Likes par mois */
+        $st = $pdo->prepare("
+            SELECT DATE_FORMAT(vl.created_at, '%Y-%m') AS ym, COUNT(*) AS c
+            FROM video_likes vl
+            JOIN videos v ON v.id = vl.video_id
+            WHERE v.user_id = ? AND vl.created_at >= DATE_FORMAT(NOW() - INTERVAL 11 MONTH, '%Y-%m-01')
+            GROUP BY ym
+        ");
+        $st->execute([$userId]);
+        foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            if (isset($chartLikes[$r['ym']])) $chartLikes[$r['ym']] = (int)$r['c'];
         }
     } catch (Throwable $e) {
         error_log('[studio_stats][chart] ' . $e->getMessage());
     }
 }
-$maxMonth = max($monthlyViews) ?: 1;
+
+$maxChart = max(array_merge([1], array_values($chartSubs), array_values($chartLikes)));
 ?>
 <!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Studio — Statistiques · Kazuri</title>
+<title>Statistiques — Kazuri</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
-<section class="content-section">
+<section class="content-section account-section" style="padding: 40px 0;">
     <div class="container">
 
-        <!-- Cartes KPI (dynamiques) -->
+        <!-- Cartes KPI -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px;">
             <div class="dashboard-card" style="margin: 0;">
-                <div style="color: #aaa; font-size: 13px; text-transform: uppercase;">Vues (<?= $days ?> jours)</div>
+                <div style="color: #aaa; font-size: 13px; text-transform: uppercase;">Vues totales</div>
                 <div style="font-size: 32px; font-weight: bold; color: #fff; margin: 8px 0;">
-                    <?= kpi_fmt($kpiViews['cur']) ?>
+                    <?= kpi_fmt($totalViews) ?>
                 </div>
-                <div style="color: <?= $viewsDelta['up'] ? '#4ade80' : '#ff4b5c' ?>; font-size: 13px;">
-                    <?= $viewsDelta['html'] ?> vs période précédente
-                </div>
+                <div style="color: #aaa; font-size: 13px;">Toutes vos vidéos publiées</div>
             </div>
             <div class="dashboard-card" style="margin: 0;">
-                <div style="color: #aaa; font-size: 13px; text-transform: uppercase;">Temps de visionnage</div>
+                <div style="color: #aaa; font-size: 13px; text-transform: uppercase;">Visionnage estimé</div>
                 <div style="font-size: 32px; font-weight: bold; color: #fff; margin: 8px 0;">
-                    <?= kpi_fmt(round($kpiHours['cur'])) ?> h
+                    <?= kpi_fmt($watchHours) ?> h
                 </div>
-                <div style="color: <?= $hoursDelta['up'] ? '#4ade80' : '#ff4b5c' ?>; font-size: 13px;">
-                    <?= $hoursDelta['html'] ?> vs période précédente
-                </div>
+                <div style="color: #aaa; font-size: 13px;">Vues × durée moyenne</div>
             </div>
             <div class="dashboard-card" style="margin: 0;">
-                <div style="color: #aaa; font-size: 13px; text-transform: uppercase;">Abonnés</div>
+                <div style="color: #aaa; font-size: 13px; text-transform: uppercase;">Nouveaux abonnés (28 j)</div>
                 <div style="font-size: 32px; font-weight: bold; color: #fff; margin: 8px 0;">
-                    <?= ($kpiSubs['cur'] > 0 ? '+' : '') . kpi_fmt($kpiSubs['cur']) ?>
+                    <?= ($subsCur > 0 ? '+' : '') . kpi_fmt($subsCur) ?>
                 </div>
                 <div style="color: <?= $subsDelta['up'] ? '#4ade80' : '#ff4b5c' ?>; font-size: 13px;">
                     <?= $subsDelta['html'] ?> vs période précédente
                 </div>
             </div>
+            <div class="dashboard-card" style="margin: 0;">
+                <div style="color: #aaa; font-size: 13px; text-transform: uppercase;">Nouveaux likes (28 j)</div>
+                <div style="font-size: 32px; font-weight: bold; color: #fff; margin: 8px 0;">
+                    <?= ($likesCur > 0 ? '+' : '') . kpi_fmt($likesCur) ?>
+                </div>
+                <div style="color: <?= $likesDelta['up'] ? '#4ade80' : '#ff4b5c' ?>; font-size: 13px;">
+                    <?= $likesDelta['html'] ?> vs période précédente
+                </div>
+            </div>
         </div>
 
-        <!-- Graphique (dynamique) -->
+        <!-- Graphique -->
         <div class="dashboard-card">
-            <h3 class="dashboard-title">Performance de la chaîne</h3>
-            <div style="display: flex; align-items: flex-end; gap: 10px; height: 200px; margin-top: 20px; padding-bottom: 20px; border-bottom: 1px solid #333;">
-                <?php foreach ($monthlyViews as $ym => $val):
-                    $h = $maxMonth > 0 ? (int)round(($val / $maxMonth) * 100) : 0;
-                    if ($h < 3) $h = 3;
-                    $op = max(0.15, round($val / $maxMonth, 2));
+            <h3 class="dashboard-title">Croissance de la chaîne</h3>
+            <p style="color: #aaa; font-size: 13px; margin: 4px 0 16px;">Abonnés et likes gagnés par mois (12 derniers mois)</p>
+
+            <div style="display: flex; align-items: flex-end; gap: 12px; height: 200px; padding-bottom: 20px; border-bottom: 1px solid #333;">
+                <?php foreach ($monthLabels as $ym => $lbl):
+                    $hSub = (int)round(($chartSubs[$ym]  / $maxChart) * 100);
+                    $hLik = (int)round(($chartLikes[$ym] / $maxChart) * 100);
                 ?>
-                    <div
-                        title="<?= htmlspecialchars($ym) ?> : <?= kpi_fmt($val) ?> vues"
-                        style="flex: 1; background: var(--accent, #ff2d3a); border-radius: 4px 4px 0 0; height: <?= $h ?>%; opacity: <?= $op ?>;">
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <div title="<?= $lbl ?> : <?= kpi_fmt($chartLikes[$ym]) ?> likes"
+                             style="width: 45%; background: #3ea6ff; border-radius: 2px 2px 0 0; height: <?= max(3, $hLik) ?>%; min-height: 3px;"></div>
+                        <div title="<?= $lbl ?> : <?= kpi_fmt($chartSubs[$ym]) ?> abonnés"
+                             style="width: 45%; background: var(--accent, #ff2d3a); border-radius: 2px 2px 0 0; height: <?= max(3, $hSub) ?>%; min-height: 3px;"></div>
                     </div>
                 <?php endforeach; ?>
             </div>
-            <div style="display: flex; justify-content: space-between; color: #aaa; font-size: 12px; margin-top: 10px;">
-                <?php
-                $frMonths = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
-                foreach (array_keys($monthlyViews) as $ym):
-                    $m = (int)substr($ym, 5, 2) - 1;
-                ?>
-                    <span><?= $frMonths[$m] ?></span>
+            <div style="display: flex; justify-content: space-between; color: #aaa; font-size: 11px; margin-top: 10px;">
+                <?php foreach ($monthLabels as $lbl): ?>
+                    <span style="flex: 1; text-align: center;"><?= $lbl ?></span>
                 <?php endforeach; ?>
+            </div>
+            <div style="display: flex; gap: 20px; margin-top: 16px; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="width: 12px; height: 12px; background: var(--accent, #ff2d3a); border-radius: 2px;"></span>
+                    <span style="color: #aaa;">Abonnés</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="width: 12px; height: 12px; background: #3ea6ff; border-radius: 2px;"></span>
+                    <span style="color: #aaa;">Likes</span>
+                </div>
             </div>
         </div>
 

@@ -12,6 +12,9 @@ if (!$currentUser || !$currentUser->isAdmin()) {
 
 $initials = mb_strtoupper(mb_substr($currentUser->firstName(), 0, 1, 'UTF-8') . mb_substr($currentUser->lastName(), 0, 1, 'UTF-8'), 'UTF-8');
 $currentPage = $_GET['p'] ?? 'admin';
+
+// Petit helper pour la classe active
+$isActive = fn(string ...$pages) => in_array($currentPage, $pages, true) ? 'active' : '';
 ?>
 <!doctype html>
 <html lang="fr">
@@ -34,10 +37,12 @@ $currentPage = $_GET['p'] ?? 'admin';
     .admin-brand span { font-size: 11px; background: var(--accent); padding: 2px 6px; border-radius: 4px; margin-left: 8px; color: #fff; font-weight: bold; }
     
     .admin-nav { padding: 12px; flex: 1; overflow-y: auto; }
-    .nav-item { display: flex; align-items: center; gap: 16px; padding: 12px; color: #aaa; text-decoration: none; border-radius: 8px; margin-bottom: 4px; transition: 0.2s; font-size: 14px; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #666; padding: 16px 12px 8px; font-weight: 700; }
+    .nav-item { display: flex; align-items: center; gap: 16px; padding: 10px 12px; color: #aaa; text-decoration: none; border-radius: 8px; margin-bottom: 4px; transition: 0.2s; font-size: 14px; }
     .nav-item:hover, .nav-item.active { background: #272727; color: #fff; }
     .nav-item.active { border-left: 3px solid var(--accent); }
-    .nav-item i { font-size: 22px; }
+    .nav-item i { font-size: 20px; }
+    .nav-item .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
     .nav-sep { height: 1px; background: #333; margin: 12px 0; }
     
     /* MAIN CONTENT & TOPBAR */
@@ -113,6 +118,7 @@ $currentPage = $_GET['p'] ?? 'admin';
     .badge-success { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
     .badge-warning { background: rgba(250, 204, 21, 0.1); color: #facc15; border: 1px solid rgba(250, 204, 21, 0.3); }
     .badge-danger { background: rgba(255, 75, 92, 0.1); color: #ff4b5c; border: 1px solid rgba(255, 75, 92, 0.3); }
+    .badge-info { background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); }
 </style>
 </head>
 <body>
@@ -122,15 +128,72 @@ $currentPage = $_GET['p'] ?? 'admin';
             <i class="ph-fill ph-shield-check"></i> Kazuri <span>ADMIN</span>
         </a>
         <div class="admin-nav">
-            <a href="index.php?p=admin" class="nav-item <?= $currentPage === 'admin' ? 'active' : '' ?>"><i class="ph ph-chart-pie-slice"></i> Vue d'ensemble</a>
-            <a href="index.php?p=admin_users" class="nav-item <?= $currentPage === 'admin_users' ? 'active' : '' ?>"><i class="ph ph-users"></i> Utilisateurs & Rôles</a>
-            <a href="index.php?p=admin_videos" class="nav-item <?= $currentPage === 'admin_videos' ? 'active' : '' ?>"><i class="ph ph-video-camera"></i> Modération Vidéos</a>
-            <a href="#" class="nav-item"><i class="ph ph-currency-dollar"></i> Finances & Abonnements</a>
-            
+
+            <!-- ===== SECTION : PILOTAGE ===== -->
+            <div class="nav-section-title">Pilotage</div>
+            <a href="index.php?p=admin" class="nav-item <?= $isActive('admin') ?>">
+                <i class="ph ph-chart-pie-slice"></i> Vue d'ensemble
+            </a>
+            <a href="index.php?p=admin_stats" class="nav-item <?= $isActive('admin_stats') ?>">
+                <i class="ph ph-chart-line-up"></i> Statistiques détaillées
+            </a>
+
+            <!-- ===== SECTION : CONTENU ===== -->
+            <div class="nav-section-title">Contenu</div>
+            <a href="index.php?p=admin_videos" class="nav-item <?= $isActive('admin_videos') ?>">
+                <i class="ph ph-video-camera"></i> Modération Vidéos
+                <span class="nav-badge">3</span>
+            </a>
+            <a href="index.php?p=admin_comments" class="nav-item <?= $isActive('admin_comments') ?>">
+                <i class="ph ph-chat-circle-dots"></i> Commentaires
+            </a>
+            <a href="index.php?p=admin_reports" class="nav-item <?= $isActive('admin_reports') ?>">
+                <i class="ph ph-flag"></i> Signalements
+            </a>
+            <a href="index.php?p=admin_categories" class="nav-item <?= $isActive('admin_categories') ?>">
+                <i class="ph ph-tag"></i> Catégories & Tags
+            </a>
+
+            <!-- ===== SECTION : UTILISATEURS ===== -->
+            <div class="nav-section-title">Utilisateurs</div>
+            <a href="index.php?p=admin_users" class="nav-item <?= $isActive('admin_users') ?>">
+                <i class="ph ph-users"></i> Utilisateurs & Rôles
+            </a>
+            <a href="index.php?p=admin_contributors" class="nav-item <?= $isActive('admin_contributors') ?>">
+                <i class="ph ph-upload-simple"></i> Contributeurs
+            </a>
+            <a href="index.php?p=admin_reviewers" class="nav-item <?= $isActive('admin_reviewers', 'admin_reviewer_edit') ?>">
+                <i class="ph ph-user-check"></i> Modérateurs (Reviewers)
+            </a>
+            <a href="index.php?p=admin_subscribers" class="nav-item <?= $isActive('admin_subscribers') ?>">
+                <i class="ph ph-bell-ringing"></i> Abonnés
+            </a>
+
+            <!-- ===== SECTION : FINANCE ===== -->
+            <div class="nav-section-title">Finance</div>
+            <a href="index.php?p=admin_transactions" class="nav-item <?= $isActive('admin_transactions') ?>">
+                <i class="ph ph-receipt"></i> Transactions
+            </a>
+            <a href="index.php?p=admin_payouts" class="nav-item <?= $isActive('admin_payouts') ?>">
+                <i class="ph ph-currency-dollar"></i> Reversements
+            </a>
+
+            <!-- ===== SECTION : SYSTÈME ===== -->
+            <div class="nav-section-title">Système</div>
+            <a href="index.php?p=admin_notifications" class="nav-item <?= $isActive('admin_notifications') ?>">
+                <i class="ph ph-megaphone"></i> Notifications
+            </a>
+            <a href="index.php?p=admin_logs" class="nav-item <?= $isActive('admin_logs') ?>">
+                <i class="ph ph-scroll"></i> Journal d'activité
+            </a>
+            <a href="index.php?p=admin_settings" class="nav-item <?= $isActive('admin_settings') ?>">
+                <i class="ph ph-gear"></i> Paramètres
+            </a>
+
             <div class="nav-sep"></div>
-            
-            <a href="#" class="nav-item"><i class="ph ph-gear"></i> Paramètres</a>
-            <a href="index.php?p=home" class="nav-item"><i class="ph ph-arrow-square-out"></i> Retour au site</a>
+            <a href="index.php?p=home" class="nav-item">
+                <i class="ph ph-arrow-square-out"></i> Retour au site
+            </a>
         </div>
     </aside>
 
@@ -143,7 +206,6 @@ $currentPage = $_GET['p'] ?? 'admin';
                 <div class="notification-wrapper" onclick="toggleNotif(event)">
                     <button class="icon-btn">
                         <i class="ph ph-bell"></i>
-                        <!-- Petit point rouge pour signaler une notification -->
                         <div class="notif-dot"></div>
                     </button>
                     
@@ -206,7 +268,6 @@ $currentPage = $_GET['p'] ?? 'admin';
             document.getElementById('notifDropdown').classList.remove('show');
         }
 
-        // Fermer les menus si on clique ailleurs sur la page
         window.addEventListener('click', function(event) {
             const notif = document.getElementById('notifDropdown');
             const user = document.getElementById('userDropdown');

@@ -9,6 +9,31 @@ App::load();
 // ✅ On s'assure que la classe User est chargée pour tout le site
 require_once ROOT . '/Classes/UserClass.php';
 
+// ✅ Utilisateur courant calculé UNE SEULE FOIS pour tout le site
+$currentUser = User::current();
+
+// ============================================================
+// ✅ ROUTE API — doit être AVANT ob_start() et tout HTML
+// ============================================================
+if (isset($_GET['api']) && $_GET['api'] === 'video') {
+    header('Content-Type: application/json; charset=utf-8');
+
+    // Variables disponibles pour public/api/video_actions.php :
+    //   $currentUser, $pdo (à charger), ROOT
+    try {
+        $pdo = Conn::getInstance()->getPdo();
+    } catch (Throwable $e) {
+        echo json_encode(['ok' => false, 'error' => 'Erreur BDD : ' . $e->getMessage()]);
+        exit;
+    }
+
+    require ROOT . '/public/api/video_actions.php';
+    exit;
+}
+
+// ============================================================
+// ✅ LANGUES
+// ============================================================
 $supportedLanguages = ['fr', 'en', 'sw'];
 if (isset($_GET['lang']) && in_array($_GET['lang'], $supportedLanguages, true)) {
     $_SESSION['kazuri_language'] = $_GET['lang'];
@@ -53,6 +78,33 @@ function loadView($page) {
     }
 }
 
+// ============================================================
+// ✅ LISTE CENTRALISÉE DES PAGES ADMIN
+// ============================================================
+$adminPages = [
+    // Pilotage
+    'admin',
+    'admin_stats',
+    // Contenu
+    'admin_videos',
+    'admin_comments',
+    'admin_reports',
+    'admin_categories',
+    // Utilisateurs
+    'admin_users',
+    'admin_contributors',
+    'admin_reviewers',
+    'admin_reviewer_edit',
+    'admin_subscribers',
+    // Finance
+    'admin_transactions',
+    'admin_payouts',
+    // Système
+    'admin_notifications',
+    'admin_logs',
+    'admin_settings',
+];
+
 ob_start();
 
 // ============================================================
@@ -72,7 +124,7 @@ if ($page === '/' || $page === 'welcome') {
     loadView('home');
 } 
 // ✅ PAGES PUBLIQUES (Films, Séries, Musique, Reels, Bibliothèque, Likes)
-elseif (in_array($page, ['films', 'series', 'musique', 'reels', 'library', 'likes'])) {
+elseif (in_array($page, ['films', 'series', 'musique', 'reels', 'library', 'likes'], true)) {
     loadView($page);
 } 
 // ✅ ROUTES ABONNEMENT & CHECKOUT
@@ -87,11 +139,11 @@ elseif ($page === 'subscription') {
 elseif (in_array($page, [
     'studio', 'studio_contents', 'studio_stats', 'studio_comments', 
     'studio_monetization', 'studio_settings', 'studio_upload'
-])) {
+], true)) {
     loadView($page);
 } 
-// ✅ ROUTES ADMIN
-elseif (in_array($page, ['admin', 'admin_users', 'admin_videos'])) {
+// ✅ ROUTES ADMIN (toutes les pages admin_*)
+elseif (in_array($page, $adminPages, true)) {
     loadView($page);
 } 
 // ✅ PAGE 404
@@ -110,11 +162,11 @@ if ($page === 'account') {
     $layoutPath = ROOT . '/ressources/views/layout/default_detailMedia.php';
 } 
 // ✅ VITRINE (Page d'accueil non connecté) -> Layout Classique
-elseif (in_array($page, ['/', 'welcome'])) {
+elseif (in_array($page, ['/', 'welcome'], true)) {
     $layoutPath = ROOT . '/ressources/views/layout/default.php';
 } 
 // ✅ DASHBOARD + PAGES PUBLIQUES (Connecté) -> Layout YouTube
-elseif (in_array($page, ['home', 'films', 'series', 'musique', 'reels', 'library', 'likes'])) {
+elseif (in_array($page, ['home', 'films', 'series', 'musique', 'reels', 'library', 'likes'], true)) {
     $layoutPath = ROOT . '/ressources/views/layout/default_home.php';
 } 
 // ✅ LAYOUT STUDIO
@@ -122,11 +174,11 @@ elseif (in_array($page, [
     'subscription', 'pricing', 'checkout', 
     'studio', 'studio_contents', 'studio_stats', 'studio_comments', 
     'studio_monetization', 'studio_settings', 'studio_upload'
-])) {
+], true)) {
     $layoutPath = ROOT . '/ressources/views/layout/default_dashboard.php';
 } 
-// ✅ LAYOUT ADMIN
-elseif (in_array($page, ['admin', 'admin_users', 'admin_videos'])) {
+// ✅ LAYOUT ADMIN (toutes les pages admin_*)
+elseif (in_array($page, $adminPages, true)) {
     $layoutPath = ROOT . '/ressources/views/layout/default_admin.php';
 } 
 // LAYOUT PAR DÉFAUT
