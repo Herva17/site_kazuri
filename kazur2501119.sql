@@ -43,7 +43,8 @@ INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `created_at`) VAL
 (1, 'Films', 'films', 'Longs et courts métrages', '2026-10-27 18:21:56'),
 (2, 'Séries', 'series', 'Épisodes et saisons de séries', '2026-10-27 18:21:56'),
 (3, 'Musique', 'musique', 'Clips, concerts et contenus musicaux', '2026-10-27 18:21:56'),
-(4, 'Autres', 'autres', 'Autres types de contenus vidéo', '2026-10-27 18:21:56');
+(4, 'Autres', 'autres', 'Autres types de contenus vidéo', '2026-10-27 18:21:56'),
+(5, 'Jeunesse', 'jeunesse', 'Contenus adaptés aux enfants et à la famille', '2026-10-27 18:21:56');
 
 -- --------------------------------------------------------
 

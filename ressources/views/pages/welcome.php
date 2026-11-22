@@ -73,10 +73,11 @@
     }
 
     // ✅ FILTRAGE PAR CATÉGORIE
-    $films = []; $series = []; $autres = [];
+    $films = []; $series = []; $jeunesse = []; $autres = [];
     foreach ($p as $v) {
         $cat = strtolower($v['category']);
-        if (strpos($cat, 'film') !== false) $films[] = $v;
+        if (strpos($cat, 'jeun') !== false || strpos($cat, 'kid') !== false || strpos($cat, 'youth') !== false) $jeunesse[] = $v;
+        elseif (strpos($cat, 'film') !== false) $films[] = $v;
         elseif (strpos($cat, 'séri') !== false || strpos($cat, 'serie') !== false) $series[] = $v;
         else $autres[] = $v;
     }
@@ -467,20 +468,20 @@ body.no-scroll { overflow: hidden !important; }
 </section>
 
 <!-- ============================================
-     SECTION 5 : AUTRES
+     SECTION 5 : JEUNESSE
      ============================================ -->
-<section id="autres" class="content-section section-featured">
+<section id="jeunesse" class="content-section section-featured" data-background="#111111">
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <div class="section-title">
-                    <h6><?= t('À EXPLORER') ?></h6>
-                    <h2><?= t('Autres vidéos') ?></h2>
+                <div class="section-title text-center light">
+                    <h6><?= t('JEUNESSE') ?></h6>
+                    <h2><?= t('À regarder en famille') ?></h2>
                 </div>
             </div>
 
-            <?php if (!empty($autres)): ?>
-                <?php foreach ($autres as $v): ?>
+            <?php if (!empty($jeunesse)): ?>
+                <?php foreach ($jeunesse as $v): ?>
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
                     <div class="media-card-pro" onclick='playCinema(<?= json_encode([
                         'url' => resolveMediaPath($v['url']),
@@ -488,7 +489,7 @@ body.no-scroll { overflow: hidden !important; }
                         'meta' => $v['category'] . ' · ' . $v['author'] . ' · ' . formatDuration($v['duration']) . ' · ' . formatViews($v['views']) . ' vues'
                     ]) ?>)'>
                         <div class="thumb-wrapper">
-                            <img src="<?= htmlspecialchars(resolveMediaPath($v['thumb']) ?: '../assets/images/3.png') ?>" 
+                            <img src="<?= htmlspecialchars(resolveMediaPath($v['thumb']) ?: '../assets/images/3.png') ?>"
                                  onerror="this.src='../assets/images/3.png'" alt="<?= htmlspecialchars($v['title']) ?>" loading="lazy">
                             <span class="badge-cat"><?= htmlspecialchars($v['category']) ?></span>
                             <span class="badge-dur"><?= formatDuration($v['duration']) ?></span>
@@ -508,20 +509,12 @@ body.no-scroll { overflow: hidden !important; }
                 </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <?php foreach ($staticAutres as $sa): ?>
-                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-                    <div class="media-card-pro">
-                        <div class="thumb-wrapper">
-                            <img src="../assets/images/<?= htmlspecialchars($sa['file']) ?>" alt="<?= htmlspecialchars($sa['title']) ?>" loading="lazy">
-                            <span class="badge-cat">Autre</span>
-                        </div>
-                        <div class="info-body">
-                            <h3 class="info-title"><?= htmlspecialchars($sa['title']) ?></h3>
-                            <p class="info-meta"><span class="info-author">Kazuri Studio</span></p>
-                        </div>
+                <div class="col-12">
+                    <div class="media-empty">
+                        <i class="lni lni-smile"></i>
+                        <h4><?= t('Aucun contenu jeunesse disponible') ?></h4>
                     </div>
                 </div>
-                <?php endforeach; ?>
             <?php endif; ?>
         </div>
     </div>
